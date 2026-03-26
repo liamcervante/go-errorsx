@@ -18,31 +18,35 @@ func Append(err error, errs ...error) error {
 	// you can call errs = Append(errs, nil), which results in a []error{nil}, not an empty list
 	// validate that as well
 
-	hasError := false
-	for _, err := range errs {
-		if err != nil {
-			hasError = true
-			break
+	var flat []error
+	for _, e := range errs {
+		if e == nil {
+			continue
+		}
+		if aggregated, ok := e.(AggregatedError); ok { //nolint:errorlint // intentionally checking immediate type to avoid merging into a deeply nested aggregate
+			flat = append(flat, aggregated.Errors()...)
+		} else {
+			flat = append(flat, e)
 		}
 	}
-	if !hasError {
+	if len(flat) == 0 {
 		return err
 	}
 
 	if err == nil {
 		return &aggregatedError{
-			errs: errs,
+			errs: flat,
 		}
 	}
 
 	if aggregated, ok := err.(AggregatedError); ok { //nolint:errorlint // intentionally checking immediate type to avoid merging into a deeply nested aggregate
 		return &aggregatedError{
-			errs: append(aggregated.Errors(), errs...),
+			errs: append(aggregated.Errors(), flat...),
 		}
 	}
 
 	return &aggregatedError{
-		errs: append([]error{err}, errs...),
+		errs: append([]error{err}, flat...),
 	}
 }
 

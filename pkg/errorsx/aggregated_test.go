@@ -53,6 +53,21 @@ func TestAppend_AggregatedBase(t *testing.T) {
 	}
 }
 
+func TestAppend_AggregatedInArgs(t *testing.T) {
+	e1 := errors.New("e1")
+	e2 := errors.New("e2")
+	e3 := errors.New("e3")
+	aggregated := Append(nil, e2, e3)
+	err := Append(e1, aggregated)
+	errs := Errors(err)
+	if len(errs) != 3 {
+		t.Fatalf("len(errs) = %d, want 3", len(errs))
+	}
+	if errs[0] != e1 || errs[1] != e2 || errs[2] != e3 { //nolint:errorlint // testing pointer identity
+		t.Errorf("errs = %v, want [e1, e2, e3]", errs)
+	}
+}
+
 func TestErrors_NonAggregated(t *testing.T) {
 	err := errors.New("single")
 	errs := Errors(err)
