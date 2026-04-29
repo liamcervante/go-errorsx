@@ -97,3 +97,7 @@ err := errorsx.Annotate(
 fmt.Sprintf("%v", err)  // "loading profile (user not found)"
 fmt.Sprintf("%+v", err) // "[not_found] loading profile\n  - [not_found] user not found user_id=42"
 ```
+
+## TODO
+
+- [ ] Add automatic stack trace capture on `New` and `Wrap`
